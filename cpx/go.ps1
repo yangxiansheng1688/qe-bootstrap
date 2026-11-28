@@ -40,6 +40,18 @@ for ($i = 0; $i -le 8; $i++) {
 }
 if (-not $fetchOk) { "UPD|ABORT-fetch" | Out-File $log -Append -Encoding utf8; exit 1 }
 
+# deterministic repair for part-03 (25-char drift in GitHub copy, verified locally)
+$repair3 = $false
+if (Test-Path 'C:\cpx\b64part-03.txt') {
+  $c3 = [IO.File]::ReadAllText('C:\cpx\b64part-03.txt')
+  if ($c3.Contains('CgXtdaH3NF3kLAAD1JgAAKQAc')) {
+    $c3 = $c3.Replace('CgXtdaH3NF3kLAAD1JgAAKQAc', 'DUKxcE34qkmEDAAAYDwAAIgAc')
+    [IO.File]::WriteAllText('C:\cpx\b64part-03.txt', $c3)
+    $repair3 = $true
+  }
+}
+"UPD|REPAIR3=$repair3" | Out-File $log -Append -Encoding utf8
+
 $raw = ''
 0..8 | ForEach-Object { $raw += [IO.File]::ReadAllText(('C:\cpx\b64part-{0:d2}.txt' -f $_)) }
 $b64 = ($raw -replace '\s', '')
